@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Kennedy Family Recipe App">
+    <meta name="author" content="Patrick Kennedy">
+    <title>Kennedy Family Recipe App</title>
+    <!-- styles -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  </head>
+
+  <body>
+    <h1>Welcome to the Kennedy Family Recipe App!</h1>
+    This site describes our favorite family recipes!
+    <h2>Breakfast Recipes</h2>
+    <h2>Lunch Recipes</h2>
+    <h2>Dinner Recipes</h2>
+    <h2>Dessert Recipes</h2>
+    <h3>Recipes</h3>
+    <table style="width:100%">
+      <tr>
+        <td>Title</td>
+        <td>Description</td>
+      </tr>
+      {% for recipe in recipes %}
+      <tr>
+        <td>{{ recipe.recipe_title }}</td>
+        <td>{{ recipe.recipe_description }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
