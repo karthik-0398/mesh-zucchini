@@ -1,7 +1,7 @@
 from gevent import monkey
 monkey.patch_all()
 
-# import serial #install pySerial
+import serial #install pySerial
 import time
 import threading
 
@@ -10,35 +10,78 @@ from flask_bootstrap import Bootstrap
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
+from dataclasses import dataclass
+
 # Flask Setup with SocketIO
 app = Flask(__name__)
 bootstrap = Bootstrap(app)
 app.debug = True
 app.config['SECRET_KEY'] = 'nomnomnom'
-# socketio = SocketIO(app)
+socketio = SocketIO(app)
 thread = None
+thread2 = None
+
+board_list = []
+
+# use some address perhaps, to make sure, no unwanted device is connected
+@dataclass
+class board:
+    id: int
+    master: bool = False
+    connected: bool = False
+    glow: bool = False
+
+def init_boards():
+    board1 = board(1, True, True, True)
+    board2 = board(2, False, True, True)
+    board3 = board(3, False, True, False)
+    board4 = board(4, False, True, True)
+    board_list.append(board1)
+    board_list.append(board2)
+    board_list.append(board3)
+    board_list.append(board4)
+
+messages = ["Connected", "Disconnected", "Conneadasdaacted", "Disconnected", "Connected", "Disconnected", "Connected"]
 
 # port = '/dev/ttyACM0' # '/dev/ttyS1' #
-# ser = serial.Serial(port, 115200, timeout = 0.5)
+port = '/dev/ttyS1' #
+ser = serial.Serial(port, 115200, timeout = 0.5, rtscts=True,dsrdtr=True)
+ser.close()
+port2 = '/dev/ttyS0' #
+ser2 = serial.Serial(port2, 115200, timeout = 0.5, rtscts=True,dsrdtr=True)
+ser2.close()
 # 9600 baud rate, '/dev/tty.usbserial', ttyUSB0
 # Ports: https://pyserial.readthedocs.io/en/latest/shortintro.html
 
+# todo, when other data is read, then there is a bottleneck
+# try to avoid messages that are not in the right format
+
 # background thread
 def serial_read_thread():
+    ser.open()
     while True:
-        time.sleep(3)
-       # data = ser.read(9999)
+        # data = ser.read(5)
+        try:
+            line = ser.read(10).decode('utf-8')
+        except IOError:
+            print("Error")
+        messages.append(line)
+        print("Message", line)
         #if len(data) > 0:
-     #       socketio.emit('message', {'data': data})
-    #    ser.close()
-
-def serial_write_thread():
-    while True:
-        #data = "010101"
-        #ser.write(data)
+        #    socketio.emit('message', {'data': data})
         time.sleep(3)
-        # ser.flush()
-        #ser.close()
+    #ser.flush()
+    ser.close()
+
+# writes hihihi every 3 seconds
+def serial_write_thread():
+    ser2.open()
+    while True:
+        data = "010101"
+        ser2.write(bytes(b'hihihi'))
+        time.sleep(3)
+    #ser2.flush()
+    ser2.close()
 
 
 @app.route("/")
@@ -46,9 +89,41 @@ def serial_write_thread():
 def mesh_dashboard():
     global thread
     if thread is None:
-        thread = threading.Thread(target=serial_write_thread())
+        thread = threading.Thread(target=serial_read_thread)
         thread.start()
-    return render_template('index.html')
+    global thread2
+    if thread2 is None:
+        thread2 = threading.Thread(target=serial_write_thread)
+        thread2.start()
+    time.sleep(5)
+    boards = [
+        {
+            'name': 'Leader Board',
+            'status': 'Connected',
+            'glow': '100',
+            'colour_connected': 'info'
+        },
+        {
+            'name': 'Child Board 1',
+            'status': 'Connected',
+            'glow': '10',
+            'colour_connected': 'info'
+        },
+        {
+            'name': 'Child Board 2',
+            'status': 'Disconnected',
+            'glow': '10',
+            'colour_connected': 'secondary'
+        },
+        {
+            'name': 'Child Board 3',
+            'status': 'Disconnected',
+            'glow': '10',
+            'colour_connected': 'secondary'
+        },
+    ]
+
+    return render_template('index.html', boards=boards, messages=messages)
 
 
 @app.route("/connect/")
@@ -63,7 +138,54 @@ def mesh_disconnect():
 '''
 
 if __name__ == "__main__":
-    # socketio.run(app)
-    app.run()
+    init_boards()
+    socketio.run(app)
+    # app.run()
     # app.run()
     # app.run(host = "0.0.0.0", port = port)
+
+"""
+from gevent import monkey
+monkey.patch_all()
+
+import serial
+import time
+from threading import Thread
+from flask import Flask, render_template
+from flask_socketio import SocketIO, emit, join_room, leave_room
+
+app = Flask(__name__)
+app.debug = True
+app.config['SECRET_KEY'] = 'hihihihi'
+socketio = SocketIO(app)
+thread = None
+
+port = '/dev/ttyS0'
+ser = serial.Serial(port, 115200, timeout=0)
+
+def background_thread():
+    while True:
+        data = ser.read(9999)
+        if len(data) > 0:
+            socketio.emit('message', {'data': data}, namespace='/test')
+    ser.close()
+
+@app.route('/')
+def index():
+    global thread
+    if thread is None:
+        thread = Thread(target=background_thread)
+        thread.start()
+    return render_template('index2.html')
+
+@socketio.on('join', namespace='/test')
+def join(message):
+    join_room(message['room'])
+
+@socketio.on('leave', namespace='/test')
+def leave(message):
+    leave_room(message['room'])
+
+if __name__ == '__main__':
+    socketio.run(app)
+"""
