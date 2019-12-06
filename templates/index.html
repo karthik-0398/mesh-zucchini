@@ -15,6 +15,16 @@
   <link href="static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
   <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <script type="text/javascript">
+    function autoRefreshPage()
+    {
+        window.location = window.location.href;
+    }
+    setInterval('autoRefreshPage()', 5000);
+  </script>
+
   <!-- Custom styles for this template-->
   <link href="static/css/sb-admin-2.css" rel="stylesheet">
 
@@ -118,8 +128,16 @@
                   <div class="d-sm-flex align-items-center justify-content-between mb-4">
                     <h5 class="text-xs font-weight-bold text-{{ board.colour_connected }} text-uppercase mb-1">{{ board.name }}</h5>
                     <div>
-                      <a href="#connect" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm"><i class="fas fa-toggle-on fa-sm text-white-50"></i> Turn on</a>
-                      <a href="#disconnect" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm"><i class="fas fa-toggle-off fa-sm text-white-50"></i> Turn off</a>
+                      <form method="post" action="/">
+                      <input type="submit" name="colour_button" value="Red" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="Green" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="Blue" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="White" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="Cyan" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="Magenta" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="Yellow" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      <input type="submit" name="colour_button" value="Off" class="d-none d-sm-inline-block btn btn-sm btn-{{ board.colour_connected }} shadow-sm">
+                      </form>
                     </div>
                   </div>
                   <div class="progress mb-4">
@@ -143,7 +161,7 @@
 
                   {% for message in messages | reverse %}
 
-                  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                  <div class="d-sm-flex align-items-center justify-content-between mb-4" id="div1">
                     <h5 class="text-xs font-weight-bold text-dark text-uppercase mb-1">{{ message }}</h5>
                   </div>
 
@@ -152,12 +170,7 @@
                 </div>
               </div>
             </div>
-
-
           </div>
-
-
-
         </div>
         <!-- /.container-fluid -->
 
