@@ -53,7 +53,7 @@ messages = []
 
 port = '/dev/ttyACM1' # '/dev/ttyS1' #
 # port = '/dev/ttyS4' #
-ser = serial.Serial(port, 115200, timeout = 0.5, rtscts=True,dsrdtr=True)
+ser = serial.Serial(port, 115200, timeout = 5, rtscts=True,dsrdtr=True)
 ser.close()
 #port2 = '/dev/ttyS2' #
 #ser2 = serial.Serial(port2, 115200, timeout = 0.5, rtscts=True,dsrdtr=True)
@@ -68,29 +68,28 @@ ser.close()
 def serial_read_thread():
     global light_command_old
     ser.open()
-    data = ""
     while True:
-        # data = ser.read(5)
-        try:
-            data = ser.read(30).decode('utf-8')
-        except IOError:
-            print("Error")
-        if len(data) > 0:
-            # socketio.emit('message', {'messages': data})
-            if(data != "None"):
-                messages.append("Received: " + data)
-            # print("Message", data)
-        time.sleep(2)
-        data = ""
         if (light_command_old != light_command):
             ser.write(bytes(light_command[0].encode('utf-8')))  # b'lalala
             light_command_old = light_command
             messages.append("Sent: " + light_command)
             # ser.write(b'\r')
         time.sleep(2)
+        # data = ser.read(5)
+        #data = ""
+        try:
+            data = ser.read(ser.inWaiting()).decode('ascii')
+        except IOError:
+            print("Error")
+        if len(data) > 0:
+            # socketio.emit('message', {'messages': data})
+            if(data != "None"):
+                messages.append("Received: " + data)
+                print(data)
+                # print("Message", data)
+        time.sleep(2)
     ser.flush()
     ser.close()
-
 
 # writes hihihi every 3 seconds
 """def serial_write_thread():
@@ -117,7 +116,7 @@ def mesh_dashboard():
         light_command = str(request.form.get('colour_button'))
         finished = False
 
-    print(light_command)
+    # print(light_command)
 
     global thread
     if thread is None:
