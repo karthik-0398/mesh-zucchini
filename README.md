@@ -4,7 +4,7 @@
 Directory needed: 
 * hello-world
 
-run with: make
+compile with: make
 
 flash with: make flash
 
